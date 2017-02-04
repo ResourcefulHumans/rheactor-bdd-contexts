@@ -31,7 +31,7 @@
     "lodash": "^4.16.1",
     "lolex": "^1.5.1",
     "moment": "^2.15.1",
-    "rheactor-server": "8.x >8.4.0",
+    "rheactor-server": "8.x >=8.4.0",
     "rheactor-value-objects": "9.x",
     "supertest": "^3.0.0",
     "yadda": "^1.1.1"
