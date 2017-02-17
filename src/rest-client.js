@@ -84,6 +84,14 @@ function checkJwtProperty (context, type, value, next) {
   next()
 }
 
+const checkReference = (context, data, subject, $id) => {
+  expect(data.$context).to.equal('https://github.com/ResourcefulHumans/rheactor-models#Reference')
+  subject = utils.template(subject, utils.data(context))
+  $id = utils.template($id, utils.data(context))
+  expect(data.subject).to.equal(subject)
+  expect(data.$id).to.equal($id)
+}
+
 export const RestClientContext = {
   beforeScenario: (context) => {
     context.body = undefined
@@ -188,12 +196,19 @@ export const RestClientContext = {
     .then(/"([^"]+)" of the ([0-9]+)[a-z]+ item should reference the "([^"]+)" with id "([^"]+)"/, function (node, num, subject, $id, next) {
       const context = this.ctx
       const item = context.response.body.items[num - 1]
+      expect(item, `item "${num}" should exist in the list`).to.not.equal(undefined)
       const data = _property(node)(item)
-      expect(data.$context).to.equal('https://github.com/ResourcefulHumans/rheactor-models#Reference')
-      subject = utils.template(subject, utils.data(context))
-      $id = utils.template($id, utils.data(context))
-      expect(data.subject).to.equal(subject)
-      expect(data.$id).to.equal($id)
+      expect(data, `"${node}" should be defined on the item`).to.not.equal(undefined)
+      checkReference(context, data, subject, $id)
+      next()
+    })
+
+    // And "user" should reference the "https://github.com/ResourcefulHumans/rheactor-models#User" with $id "{jwt.sub}"
+    .then(/"([^"]+)" should reference the "([^"]+)" with id "([^"]+)"/, function (node, subject, $id, next) {
+      const context = this.ctx
+      const data = context.response.body[node]
+      expect(data, `"${node}" should be defined on the body`).to.not.equal(undefined)
+      checkReference(context, data, subject, $id)
       next()
     })
 
