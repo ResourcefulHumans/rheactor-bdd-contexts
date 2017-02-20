@@ -1,6 +1,5 @@
 import _forIn from 'lodash/forIn'
 import _filter from 'lodash/filter'
-import _map from 'lodash/map'
 import _merge from 'lodash/merge'
 import _property from 'lodash/property'
 import {expect} from 'chai'
@@ -90,6 +89,22 @@ const checkReference = (context, data, subject, $id) => {
   $id = utils.template($id, utils.data(context))
   expect(data.subject).to.equal(subject)
   expect(data.$id).to.equal($id)
+}
+
+/**
+ * @param {Object} list
+ * @param {String} itemContext
+ * @param {Number} num
+ * @param {Number} total
+ */
+const checkList = (list, itemContext, num, total) => {
+  expect(list, 'The list should not be undefined').to.not.equal(undefined)
+  expect(list.$context, 'The $context of a list should be defined').to.equal('https://github.com/ResourcefulHumans/rheactor-models#List')
+  if (total !== undefined) expect(list.total, `The list should have ${total} items`).to.equal(+total)
+  if (num !== undefined) expect(list.items.length, `The items array should have ${num} elements`).to.equal(+num)
+  list.items.map(item => {
+    expect(item.$context, `The $context of each item should be ${itemContext}`).to.equal(itemContext)
+  })
 }
 
 export const RestClientContext = {
@@ -326,25 +341,22 @@ export const RestClientContext = {
 
     .then(/a list of "([^"]+)" with ([0-9]+) of ([0-9]+) items? should be returned/, function (itemContext, num, total, next) {
       const context = this.ctx
-      let list = context.response.body
       expect(context.response.statusCode).to.equal(200)
-      expect(list.$context).to.equal('https://github.com/ResourcefulHumans/rheactor-models#List')
-      expect(list.total).to.equal(+total)
-      expect(list.items.length).to.equal(+num)
-      _map(list.items, function (item) {
-        expect(item.$context).to.equal(itemContext)
-      })
+      checkList(context.response.body, itemContext, num, total)
       next()
     })
 
     .then(/a list of "([^"]+)" should be returned/, function (itemContext, next) {
       const context = this.ctx
       expect(context.response.statusCode).to.equal(200)
-      let list = context.response.body
-      expect(list.$context).to.equal('https://github.com/ResourcefulHumans/rheactor-models#List')
-      _map(list.items, function (item) {
-        expect(item.$context).to.equal(itemContext)
-      })
+      checkList(context.response.body, itemContext)
+      next()
+    })
+
+    .then(/"([^"]+)" should be a list of "([^"]+)" with ([0-9]+) of ([0-9]+) items?/, function (node, itemContext, num, total, next) {
+      const context = this.ctx
+      expect(context.response.statusCode).to.equal(200)
+      checkList(context.response.body[node], itemContext, num, total)
       next()
     })
 
