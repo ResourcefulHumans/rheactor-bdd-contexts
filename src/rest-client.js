@@ -180,9 +180,18 @@ export const RestClientContext = {
       next()
     })
 
-    .when('I store the link to "$relation" as "$storage"', function (relation, storage, next) {
+    .when(/I store the link to "([^"]+)" as "([^"]+)"/, function (relation, storage, next) {
       const context = this.ctx
       let matched = _filter(context.response.body.$links, (link) => {
+        return link.rel === relation
+      })
+      utils.data(context, storage, matched[0].href)
+      next()
+    })
+
+    .when(/I store the link to "([^"]+)" of "([^"]+)" as "([^"]+)"/, function (relation, node, storage, next) {
+      const context = this.ctx
+      let matched = _filter(_property(node)(context.response.body).$links, (link) => {
         return link.rel === relation
       })
       utils.data(context, storage, matched[0].href)
