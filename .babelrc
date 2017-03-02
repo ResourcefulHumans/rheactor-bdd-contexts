@@ -5,15 +5,9 @@
       "env",
       {
         "targets": {
-          "node": 4.3,
-          "browsers": [
-            "last 2 versions"
-          ]
+          "node": 6.9,
         }
       }
     ]
-  ],
-  "plugins": [
-    "transform-object-assign"
   ]
 }
