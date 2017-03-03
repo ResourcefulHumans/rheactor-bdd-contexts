@@ -50,10 +50,10 @@ export const TimeContext = {
       const context = this.ctx
       switch (direction) {
         case 'future':
-          expect(Math.round(moment.duration(+context.response.body[node] - Date.now()).asDays())).to.equal(+num)
+          expect(Math.round(moment.duration(new Date(context.response.body[node]).getTime() - Date.now()).asDays())).to.equal(+num)
           break
         case 'past':
-          expect(Math.round(moment.duration(Date.now() - +context.response.body[node]).asDays())).to.equal(-num)
+          expect(Math.round(moment.duration(Date.now() - new Date(context.response.body[node]).getTime()).asDays())).to.equal(-num)
           break
         default:
           throw new ValidationFailedError('Invalid direction: ' + direction)
@@ -62,12 +62,12 @@ export const TimeContext = {
     })
     .then('"$node" should be now', function (node, next) {
       const context = this.ctx
-      expect(Math.round(moment.duration(+context.response.body[node] - Date.now()).asSeconds())).to.equal(0)
+      expect(Math.round(moment.duration(new Date(context.response.body[node]).getTime() - Date.now()).asSeconds())).to.equal(0)
       next()
     })
     .then('the $header header should be now', function (header, next) {
       const context = this.ctx
-      expect(Math.round(moment.duration(+context.response.header[header.toLowerCase()] - Date.now()).asSeconds())).to.equal(0)
+      expect(Math.round(moment.duration(new Date(context.response.header[header.toLowerCase()]).getTime() - Date.now()).asSeconds())).to.equal(0)
       next()
     })
 }
