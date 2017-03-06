@@ -62,12 +62,12 @@ export const TimeContext = {
     })
     .then('"$node" should be now', function (node, next) {
       const context = this.ctx
-      expect(Math.round(moment.duration(new Date(context.response.body[node]).getTime() - Date.now()).asSeconds())).to.equal(0)
+      expect(Math.round(moment.duration(new Date(context.response.body[node]).getTime() - Date.now()).asSeconds())).to.be.within(-10, 10)
       next()
     })
     .then('the $header header should be now', function (header, next) {
       const context = this.ctx
-      expect(Math.round(moment.duration(new Date(context.response.header[header.toLowerCase()]).getTime() - Date.now()).asSeconds())).to.equal(0)
+      expect(Math.round(moment.duration(new Date(context.response.header[header.toLowerCase()]).getTime() - Date.now()).asSeconds())).to.be.within(-10, 10)
       next()
     })
 }
