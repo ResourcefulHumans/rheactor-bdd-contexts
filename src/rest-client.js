@@ -33,15 +33,19 @@ function doRequest (context, method, endpoint, next) {
   let agent = client(context)
   let url = utils.template(endpoint, utils.data(context))
   let localUrl = url.replace(testHost, '')
+  if (process.env.DEBUG_REST) {
+    console.log('>', method, localUrl)
+  }
   let request = context.request = agent[method.toLowerCase()](localUrl)
   _forIn(utils.header(context), function (value, name) {
     request.set(name, value)
   })
-  let body = utils.template(context.body, utils.data(context))
-  if (process.env.DEBUG_REST) {
-    console.log('>', method, localUrl)
+  if (!context.rawBody) {
+    let body = utils.template(context.body, utils.data(context))
+    request.send(JSON.stringify(JSON.parse('{' + body + '}')))
+  } else {
+    request.send(context.body)
   }
-  request.send(JSON.stringify(JSON.parse('{' + body + '}')))
   request.end(function (error, response) {
     if (process.env.DEBUG_REST) {
       if (response && response.statusCode) {
@@ -129,6 +133,13 @@ export const RestClientContext = {
     .given('this is the request body\n$json', function (json, next) {
       const context = this.ctx
       context.body = json
+      next()
+    })
+
+    .given('this JSON is the request body\n$json', function (json, next) {
+      const context = this.ctx
+      context.body = JSON.stringify(JSON.parse(`{${json}}`))
+      context.rawBody = true
       next()
     })
 
